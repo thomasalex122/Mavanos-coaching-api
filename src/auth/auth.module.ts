@@ -11,7 +11,7 @@ import { JwtStrategy } from './jwt.strategy';
       secret: process.env.JWT_SECRET, 
       signOptions: { 
         // This is the global expiration policy for your digital wristbands
-        expiresIn: '1d', 
+        expiresIn: '7d', 
       },
     }),
   ],
