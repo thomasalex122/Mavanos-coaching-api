@@ -25,6 +25,9 @@ model Session {
   date DateTime 
   maxSlots Int
 
+  
+  description String    
+  price       Float     
   coachId Int 
   coach User  @relation(fields: [coachId] , references: [id])
   bookings Booking[]

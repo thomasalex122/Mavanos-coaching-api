@@ -1,11 +1,22 @@
-//the DTO describes what data is expected.
+import { IsString, IsNotEmpty, IsNumber, IsISO8601, Min } from 'class-validator';
 
 export class CreateSessionDto {
+  @IsString()
+  @IsNotEmpty({ message: 'Class title cannot be empty' })
+  title!: string;
 
-    // ! = It tells TypeScript: "I promise this will get a value when the user submits the form. Stop worrying."
+  @IsString()
+  @IsNotEmpty({ message: 'Description cannot be empty' })
+  description!: string;
 
+  @IsNumber()
+  @Min(0, { message: 'Price cannot be negative' })
+  price!: number;
 
-    title!: string;
-    date!: string;
-    maxSlots! :  number;
+  @IsISO8601({}, { message: 'Date must be a valid ISO8601 string' })
+  date!: string;
+
+  @IsNumber()
+  @Min(1, { message: 'Max slots must be at least 1' })
+  maxSlots!: number;
 }

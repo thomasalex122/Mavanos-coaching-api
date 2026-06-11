@@ -8,14 +8,16 @@ export class SessionsService {
   
   constructor(private prisma: PrismaService) {}
 
-  async create(createSessionDto : CreateSessionDto , coachId : number) {
+  async create(createSessionDto: CreateSessionDto, coachId: number) {
     return this.prisma.session.create({
       data: {
         title: createSessionDto.title,
+        description: createSessionDto.description,
+        price: createSessionDto.price,
         date: new Date(createSessionDto.date),
-        maxSlots: createSessionDto.maxSlots,
-        coachId : coachId,
-      },
+        maxSlots: createSessionDto.maxSlots, // No more duct tape!
+        coachId: coachId,
+      }
     });
   }
   // We will build the rest of these later!

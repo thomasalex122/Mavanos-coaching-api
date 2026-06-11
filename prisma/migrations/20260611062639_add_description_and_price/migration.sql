@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Session" ADD COLUMN     "description" TEXT NOT NULL DEFAULT 'TBD',
+ADD COLUMN     "price" DOUBLE PRECISION NOT NULL DEFAULT 0;

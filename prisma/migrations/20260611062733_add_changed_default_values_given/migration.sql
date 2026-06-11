@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Session" ALTER COLUMN "description" DROP DEFAULT,
+ALTER COLUMN "price" DROP DEFAULT;
