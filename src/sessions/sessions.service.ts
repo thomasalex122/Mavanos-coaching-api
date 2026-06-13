@@ -13,9 +13,12 @@ export class SessionsService {
       data: {
         title: createSessionDto.title,
         description: createSessionDto.description,
+        sport: createSessionDto.sport,          // <-- ADDED
+        location: createSessionDto.location,    // <-- ADDED
+        timeSlot: createSessionDto.timeSlot,    // <-- ADDED
         price: createSessionDto.price,
         date: new Date(createSessionDto.date),
-        maxSlots: createSessionDto.maxSlots, // No more duct tape!
+        maxSlots: createSessionDto.maxSlots, 
         coachId: coachId,
       }
     });
@@ -25,6 +28,7 @@ export class SessionsService {
   {
     return this.prisma.session.findMany({
       include:{
+        bookings: true,
         coach: {
           select:{
             name: true,
@@ -37,43 +41,43 @@ export class SessionsService {
   }
 
   // the Booking Function for Users to book a session
-  async bookSession(sessionId: number , studentId : number )
-  {
-    try{
-    const ticket = await this.prisma.booking.create(
-      {
-        data: {
-          sessionId:  sessionId,
-          userId: studentId,
-        },
-      }
-    );
-    return{message : "Session booked Successfully ! " , ticket}
-  }
-  catch(error: any){
-    // Prisma throws a specific error code ("P2002") when a unique constraint fails, which in this case would indicate that the user has already booked the session.
-    if (error.code === 'P2002') {
-      throw new ConflictException('You have already booked this session.');
-    }
-    throw error;
-  }
-}
+//   async bookSession(sessionId: number , studentId : number )
+//   {
+//     try{
+//     const ticket = await this.prisma.booking.create(
+//       {
+//         data: {
+//           sessionId:  sessionId,
+//           userId: studentId,
+//         },
+//       }
+//     );
+//     return{message : "Session booked Successfully ! " , ticket}
+//   }
+//   catch(error: any){
+//     // Prisma throws a specific error code ("P2002") when a unique constraint fails, which in this case would indicate that the user has already booked the session.
+//     if (error.code === 'P2002') {
+//       throw new ConflictException('You have already booked this session.');
+//     }
+//     throw error;
+//   }
+// }
 
-  async getStudentSchedule(studentId: number) {
-    return this.prisma.booking.findMany({
-      where: { userId: studentId },
-      // Deep Include: Grab the ticket -> grab the class -> grab the coach's name!
-      include: {
-        session: {
-          include: {
-            coach: {
-              select: { name: true, email: true }
-            }
-          }
-        }
-      }
-    });
-  }
+//   async getStudentSchedule(studentId: number) {
+//     return this.prisma.booking.findMany({
+//       where: { userId: studentId },
+//       // Deep Include: Grab the ticket -> grab the class -> grab the coach's name!
+//       include: {
+//         session: {
+//           include: {
+//             coach: {
+//               select: { name: true, email: true }
+//             }
+//           }
+//         }
+//       }
+//     });
+//   }
 
 
   async getCoachClasses(coachId: number) {
@@ -90,6 +94,20 @@ export class SessionsService {
         }
       }
     });
+  }
+
+  async deleteSession(sessionId: number, coachId: number) {
+    // 1. Verify this coach actually owns this session
+    const session = await this.prisma.session.findUnique({ where: { id: sessionId } });
+    if (!session || session.coachId !== coachId) {
+      throw new Error("You do not have permission to delete this class.");
+    }
+
+    // 2. Delete all bookings tied to this class first (preventing PostgreSQL constraint errors)
+    await this.prisma.booking.deleteMany({ where: { sessionId: sessionId } });
+
+    // 3. Delete the actual session safely
+    return this.prisma.session.delete({ where: { id: sessionId } });
   }
   
 }

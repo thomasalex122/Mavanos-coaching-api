@@ -7,45 +7,46 @@ datasource db {
   
 }
 
-
 model User {
-  id Int @id @default(autoincrement())
-  name String 
-  email String @unique 
+  id       Int       @id @default(autoincrement())
+  name     String 
+  email    String    @unique 
   password String 
-  role Role @default(STUDENT)
-  session Session[]
+  role     Role      @default(STUDENT)
+  session  Session[]
   bookings Booking[]
 }
 
-
 model Session {
-  id Int @id @default(autoincrement())
-  title String 
-  date DateTime 
-  maxSlots Int
-
-  
+  id          Int       @id @default(autoincrement())
+  title       String 
+  date        DateTime 
+  maxSlots    Int
   description String    
   price       Float     
-  coachId Int 
-  coach User  @relation(fields: [coachId] , references: [id])
-  bookings Booking[]
   
+  // --- NEW COLUMNS FOR YOUR UI ---
+  sport       String    
+  location    String    
+  timeSlot    String    
+  // -------------------------------
+  
+  coachId     Int 
+  coach       User      @relation(fields: [coachId], references: [id])
+  bookings    Booking[]
 }
 
 model Booking {
-  id Int @id @default(autoincrement())
-  user User @relation(fields : [userId] , references : [id])
-  userId Int
-  session Session @relation(fields: [sessionId] , references:[id])
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields : [userId], references : [id])
+  userId    Int
+  session   Session @relation(fields: [sessionId], references:[id])
   sessionId Int 
 
-  @@unique([userId , sessionId])
-
+  @@unique([userId, sessionId]) // Great job adding this constraint!
 }
 
-enum Role{
+enum Role {
   STUDENT
   COACH
 }

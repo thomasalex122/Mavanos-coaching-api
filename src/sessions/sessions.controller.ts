@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, ForbiddenException, Get , Param , ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, ForbiddenException, Get , Param , ParseIntPipe, Delete } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -31,49 +31,59 @@ export class SessionsController {
   }
 
 
-  // for users to book a session
-
   @UseGuards(AuthGuard('jwt'))
-  @Post(':id/book')
-
-  // it takes the id from rquest param then converts into int and that is saved into sessionID : number ( prisma takes only Number not int or float)
-  book(@Param('id' , ParseIntPipe) sessionId : number , @Request() req){
-    if (req.user.role !== 'STUDENT'){
-      throw new ForbiddenException('Only Students can book a session!');
+  @Delete(':id')
+  deleteClass(@Param('id', ParseIntPipe) sessionId: number, @Request() req) {
+    if (req.user.role !== 'COACH') {
+      throw new ForbiddenException('Only Coaches can delete classes!');
     }
-
-    const verifiedStudentId = req.user.userId ;
-
-    if (!verifiedStudentId) {
-      throw new ForbiddenException('Could not identify student from token.');
-    }
-
-
-
-    // we are sending only id of session and student id not sending the book word
-    return this.sessionsService.bookSession(sessionId , verifiedStudentId);
+    return this.sessionsService.deleteSession(sessionId, req.user.userId);
   }
+
+
+  // // for users to book a session
+
+  // @UseGuards(AuthGuard('jwt'))
+  // @Post(':id/book')
+
+  // // it takes the id from rquest param then converts into int and that is saved into sessionID : number ( prisma takes only Number not int or float)
+  // book(@Param('id' , ParseIntPipe) sessionId : number , @Request() req){
+  //   if (req.user.role !== 'STUDENT'){
+  //     throw new ForbiddenException('Only Students can book a session!');
+  //   }
+
+  //   const verifiedStudentId = req.user.userId ;
+
+  //   if (!verifiedStudentId) {
+  //     throw new ForbiddenException('Could not identify student from token.');
+  //   }
+
+
+
+  //   // we are sending only id of session and student id not sending the book word
+  //   return this.sessionsService.bookSession(sessionId , verifiedStudentId);
+  // }
 
 
   // the Student Schedule Route to get all the sessions that a student has booked
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('my-schedule')
-  getSchedule(@Request() req) 
-  {
-    if (req.user.role !== 'STUDENT'){
-      throw new ForbiddenException('Only Students can view their schedule!');
-    }
+  // @UseGuards(AuthGuard('jwt'))
+  // @Get('my-schedule')
+  // getSchedule(@Request() req) 
+  // {
+  //   if (req.user.role !== 'STUDENT'){
+  //     throw new ForbiddenException('Only Students can view their schedule!');
+  //   }
 
-    const studentId = req.user.userId ;
+  //   const studentId = req.user.userId ;
 
-    if (!studentId) {
-      throw new ForbiddenException('Could not identify student from token.');
-    }
+  //   if (!studentId) {
+  //     throw new ForbiddenException('Could not identify student from token.');
+  //   }
 
-    return this.sessionsService.getStudentSchedule(studentId);
+  //   return this.sessionsService.getStudentSchedule(studentId);
 
-  }
+  // }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('my-classes')
